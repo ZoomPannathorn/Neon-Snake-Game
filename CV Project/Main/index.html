@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="en">
+ <head>
+  <!-- ส่วนหัวของเอกสาร HTML -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Neon Snake Game</title>
+  
+  <!-- โหลดไลบรารี MediaPipe สำหรับตรวจจับมือและวาดภาพ -->
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+  
+  <!-- โหลดไลบรารี Face API สำหรับตรวจจับใบหน้า -->
+  <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js" crossorigin="anonymous"></script>
+  
+  <!-- โหลดฟอนต์จาก Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&amp;family=Exo+2:wght@300;400;600&amp;display=swap" rel="stylesheet">
+  
+  <!-- ลิงก์ไปยังไฟล์ CSS -->
+  <link rel="stylesheet" href="style.css">
+  
+  <!-- โหลด Tailwind CSS สำหรับสไตล์ -->
+  <script src="https://cdn.tailwindcss.com" type="text/javascript"></script>
+ </head>
+ <body>
+  <!-- ส่วนหัวของหน้าเว็บ -->
+  <header class="header">
+    <h1 class="title" id="gameTitle">🐍 Neon Snake Game</h1>
+    <p class="subtitle">Control with finger pointing • Collect food • Snake wraps around walls!</p>
+  </header>
+  
+  <!-- คอนเทนเนอร์หลักสำหรับเกม -->
+  <div class="container">
+   <div class="game-area">
+    <div class="game-panel">
+     <div class="game-container">
+      <div class="main-stage">
+        <!-- กล้องและส่วนตรวจจับมือด้านซ้าย -->
+        <div class="stage-side left-camera">
+          <div style="position: relative; display:flex; justify-content:center;">
+            <!-- องค์ประกอบวิดีโอสำหรับแสดงภาพจากกล้อง -->
+            <video id="videoElement" width="220" height="165" autoplay style="border: 2px solid #00ffff; border-radius: 10px; display: block;"></video>
+            <div style="position: absolute; top: 5px; left: 5px; background: rgba(0,0,0,0.7); color: #00ffff; padding: 3px 6px; border-radius: 5px; font-size: 11px;">
+              Your Camera
+            </div>
+          </div>
+          <div style="height:12px"></div>
+          <div style="position: relative; display:flex; justify-content:center;">
+            <!-- แคนวาสสำหรับแสดงการตรวจจับมือ -->
+            <canvas id="handCanvas" width="220" height="165" style="border: 2px solid #ff00ff; border-radius: 10px; background: rgba(0,0,0,0.5); display: block;"></canvas>
+            <div style="position: absolute; top: 5px; left: 5px; background: rgba(0,0,0,0.7); color: #ff00ff; padding: 3px 6px; border-radius: 5px; font-size: 11px;">
+              Hand Detection
+            </div>
+          </div>
+        </div>
+
+        <!-- ส่วนกลางสำหรับเกมหลัก -->
+        <div class="stage-center">
+          <!-- แคนวาสสำหรับเกม -->
+          <canvas id="gameCanvas" width="800" height="480"></canvas>
+          <!-- ภาพทับซ้อนสำหรับการเริ่มเกมและจบเกม -->
+          <div class="game-overlay" id="gameOverlay">
+           <div class="overlay-content">
+            <h2 id="overlayTitle">🐍 Ready to Play?</h2>
+            <p id="overlayText">Point your finger to control the snake!</p>
+            <button class="btn btn-primary" onclick="startGame()" id="startBtn">Start Camera &amp; Game</button>
+           </div>
+          </div>
+        </div>
+
+        <!-- ด้านขวาว่าง (ย้ายส่วนตรวจจับมือไปด้านซ้ายแล้ว) -->
+        <div class="stage-side right-empty" aria-hidden="true"></div>
+      </div>
+     </div>
+     
+     <!-- ส่วนควบคุมเกม -->
+     <div class="controls">
+      <div style="text-align: center; color: #00ffff; margin: 15px 0;">
+       <p><strong>🖐️ Hand Control:</strong> Point your index finger to move the snake!</p>
+       <p><small>Camera shows your hand tracking • Pink canvas displays finger position</small></p>
+      </div>
+      <!-- ปุ่มควบคุมสำหรับมือถือ/แท็บเล็ต -->
+      <div class="control-row"><button class="control-btn" onclick="changeDirection('up')">↑</button></div>
+      <div class="control-row">
+        <button class="control-btn" onclick="changeDirection('left')">←</button>
+        <button class="control-btn" onclick="changeDirection('down')">↓</button>
+        <button class="control-btn" onclick="changeDirection('right')">→</button>
+      </div>
+      <div style="text-align: center; color: #cccccc; margin-top: 10px;">
+        <small>Backup: Use arrow keys or buttons above</small>
+      </div>
+     </div>
+    </div>
+    
+    <!-- แผงสถิติและการตั้งค่า -->
+    <div class="stats-panel">
+     <h3 class="stats-title">Game Stats</h3>
+     <!-- รายการสถิติต่างๆ -->
+     <div class="stat-item"><span class="stat-label">Score</span> <span class="stat-value" id="currentScore">0</span></div>
+     <div class="stat-item"><span class="stat-label">High Score</span> <span class="stat-value" id="highScore">0</span></div>
+     <div class="stat-item"><span class="stat-label">Food Eaten</span> <span class="stat-value" id="foodCount">0</span></div>
+     <div class="stat-item"><span class="stat-label">Length</span> <span class="stat-value" id="snakeLength">1</span></div>
+     <div class="stat-item"><span class="stat-label">Level</span> <span class="stat-value" id="currentLevel">1</span></div>
+     <div class="stat-item"><span class="stat-label">Target Food</span> <span class="stat-value" id="targetFood">10</span></div>
+     
+     <!-- แถบแสดงความคืบหน้าเลเวล -->
+     <div class="level-progress">
+      <div class="level-fill" id="levelProgress" style="width: 0%;"></div>
+     </div>
+     <div style="text-align: center; color: #cccccc; margin-top: 5px;">
+       <small id="progressText">Collect 10 food to advance to Level 2</small>
+     </div>
+     
+     <!-- การเลือกระดับความยาก -->
+     <div class="difficulty-select">
+       <label style="color: #ffffff; font-weight:600; margin-right:6px;">Difficulty:</label>
+       <button class="btn" id="diffEasy" onclick="setDifficulty('easy')" style="background: linear-gradient(45deg, #22c55e, #16a34a);">Easy</button>
+       <button class="btn" id="diffMedium" onclick="setDifficulty('medium')" style="background: linear-gradient(45deg, #60a5fa, #3b82f6);">Medium</button>
+       <button class="btn" id="diffHard" onclick="setDifficulty('hard')" style="background: linear-gradient(45deg, #fb7185, #ef4444);">Hard</button>
+     </div>
+     
+     <!-- ปุ่มควบคุมเกม -->
+     <div class="game-actions">
+       <button class="btn btn-primary" onclick="startGame()" id="playBtn">
+         <span class="loading" id="playLoadingSpinner" style="display: none;"></span>
+         <span id="playBtnText">New Game</span>
+       </button>
+       <button class="btn btn-secondary" onclick="pauseGame()" id="pauseBtn">
+         <span id="pauseBtnText">Pause</span>
+       </button>
+       <button class="btn" onclick="showTutorial()" style="background: linear-gradient(45deg, #ffff00, #ff8000); color: #000; box-shadow: 0 0 20px rgba(255, 255, 0, 0.3); margin-top: 10px;">
+         📚 How to Play
+       </button>
+     </div>
+     
+     <!-- ส่วนสำหรับแสดงความสำเร็จ -->
+     <div id="achievements"></div>
+    </div>
+   </div>
+   
+   <!-- โมดอลสอนวิธีการเล่น -->
+   <div id="tutorialModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1000; padding: 20px; overflow-y: auto;">
+    <div style="max-width: 800px; margin: 0 auto; background: linear-gradient(135deg, rgba(0, 50, 100, 0.9), rgba(50, 0, 100, 0.9)); border-radius: 20px; padding: 30px; border: 2px solid #00ffff; box-shadow: 0 0 30px rgba(0, 255, 255, 0.3);">
+     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+      <h2 style="font-family: 'Orbitron', monospace; color: #00ffff; font-size: 2rem; margin: 0;">🐍 How to Play</h2>
+      <button onclick="closeTutorial()" style="background: #ff0040; color: white; border: none; border-radius: 50%; width: 40px; height: 40px; font-size: 1.5rem; cursor: pointer;">×</button>
+     </div>
+     <div style="display: grid; gap: 25px;">
+      <!-- วัตถุประสงค์ของเกม -->
+      <div style="background: rgba(0,255,255,0.1); padding: 20px; border-radius: 15px; border-left: 4px solid #00ffff;">
+       <h3 style="color: #00ffff; margin-bottom: 15px; font-family: 'Orbitron', monospace;">🎯 Game Objective</h3>
+       <p style="color: #cccccc; line-height: 1.6;">Control the neon snake to eat food and grow longer. Avoid hitting your own body! The snake wraps around walls, so you won't die from hitting edges.</p>
+      </div>
+      
+      <!-- การควบคุมด้วยมือ -->
+      <div style="background: rgba(255,0,255,0.1); padding: 20px; border-radius: 15px; border-left: 4px solid #ff00ff;">
+       <h3 style="color: #ff00ff; margin-bottom: 15px; font-family: 'Orbitron', monospace;">🖐️ Hand Controls</h3>
+       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px;">
+        <div style="text-align: center; color: #cccccc;">
+         <div style="font-size: 2rem; margin-bottom: 10px;">👆</div>
+         <p><strong>Point Up:</strong> Snake moves up</p>
+        </div>
+        <div style="text-align: center; color: #cccccc;">
+         <div style="font-size: 2rem; margin-bottom: 10px;">👇</div>
+         <p><strong>Point Down:</strong> Snake moves down</p>
+        </div>
+        <div style="text-align: center; color: #cccccc;">
+         <div style="font-size: 2rem; margin-bottom: 10px;">👈</div>
+         <p><strong>Point Right:</strong> Snake moves left</p>
+        </div>
+        <div style="text-align: center; color: #cccccc;">
+         <div style="font-size: 2rem; margin-bottom: 10px;">👉</div>
+         <p><strong>Point Left:</strong> Snake moves right</p>
+        </div>
+       </div>
+       <p style="color: #ffff00; text-align: center; margin-top: 15px; font-size: 0.9rem;"><strong>Note:</strong> Camera is mirrored like a selfie camera</p>
+      </div>
+      
+      <!-- การควบคุมด้วยคีย์บอร์ด -->
+      <div style="background: rgba(255,255,0,0.1); padding: 20px; border-radius: 15px; border-left: 4px solid #ffff00;">
+       <h3 style="color: #ffff00; margin-bottom: 15px; font-family: 'Orbitron', monospace;">⌨️ Keyboard Controls</h3>
+       <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; text-align: center;">
+        <div style="background: rgba(255,255,255,0.1); padding: 10px; border-radius: 8px; color: #cccccc;">
+         <div style="font-weight: bold;">↑</div><small>Up</small>
+        </div>
+        <div style="background: rgba(255,255,255,0.1); padding: 10px; border-radius: 8px; color: #cccccc;">
+         <div style="font-weight: bold;">↓</div><small>Down</small>
+        </div>
+        <div style="background: rgba(255,255,255,0.1); padding: 10px; border-radius: 8px; color: #cccccc;">
+         <div style="font-weight: bold;">←</div><small>Left</small>
+        </div>
+        <div style="background: rgba(255,255,255,0.1); padding: 10px; border-radius: 8px; color: #cccccc;">
+         <div style="font-weight: bold;">→</div><small>Right</small>
+        </div>
+       </div>
+      </div>
+      
+      <!-- การให้คะแนนและเลเวล -->
+      <div style="background: rgba(0,255,0,0.1); padding: 20px; border-radius: 15px; border-left: 4px solid #00ff00;">
+       <h3 style="color: #00ff00; margin-bottom: 15px; font-family: 'Orbitron', monospace;">🏆 Scoring &amp; Levels</h3>
+       <ul style="color: #cccccc; line-height: 1.8; list-style: none; padding: 0;">
+        <li>💎 <strong>+10 points</strong> for each diamond food eaten</li>
+        <li>📈 <strong>Level up</strong> every 10 food collected</li>
+        <li style="border-top: #ffff00;">🧘 <strong style="color: #ffff00;">FACE YOGA CHALLENGE:</strong> After leveling up, you must copy the example pose to continue!</li>
+        <li>⚡ <strong>Speed increases</strong> with each level</li>
+        <li>🏅 <strong>Achievements</strong> unlock at milestone scores</li>
+       </ul>
+      </div>
+      
+      <!-- การท้าทาย Face Yoga -->
+      <div style="background: rgba(255, 255, 0, 0.1); padding: 20px; border-radius: 15px; border-left: 4px solid #ffff00;">
+        <h3 style="color: #ffff00; margin-bottom: 10px; font-family: 'Orbitron', monospace;">⭐ Level Up Challenge (Face Yoga)</h3>
+        <p style="color: #cccccc; line-height: 1.8; margin-bottom: 10px;">
+          To advance to the next level, you must complete a <strong>Face Yoga Challenge!</strong>
+          <br>This is a fun break to stretch your facial muscles before the game gets faster.
+        </p>
+        <ul style="color: #cccccc; line-height: 1.4; list-style: none; padding-left: 0;">
+          <li>⏸️ When you level up, the game will <strong>pause</strong>.</li>
+          <li>🖼️ A new window will show an example pose (like "Puff Cheeks" or "Wide Eyes").</li>
+          <li>🤖 Your camera will show a <strong>face skeleton</strong> to help guide you.</li>
+          <li>🎯 Your mission: <strong>Copy the example pose</strong> until the AI detects a match.</li>
+          <li>🚀 Once you succeed, the game resumes at the <strong>new, faster speed!</strong></li>
+          <li>🎯 To pass, your Similarity Score must beat the Required Percentage. Match the pose to continue!</li>
+        </ul>
+        <div style="display: flex; justify-content: space-between; gap: 10px; margin-top: 15px;">
+          <img src="picture/how to1.png" alt="Example pose 1" style="width: 32%; border-radius: 8px; border: 1px solid #ffff00;">
+          <img src="picture/how to2.png" alt="Example pose 2" style="width: 32%; border-radius: 8px; border: 1px solid #ffff00;">
+          <img src="picture/how to3.png" alt="Example pose 3" style="width: 32%; border-radius: 8px; border: 1px solid #ffff00;">
+        </div>
+      </div>
+      
+      <!-- ลูกบอลไฟฟ้า -->
+      <div style="background: rgba(255,0,0,0.1); padding: 20px; border-radius: 15px; border-left: 4px solid #ff0000;">
+       <h3 style="color: #ff0000; margin-bottom: 15px; font-family: 'Orbitron', monospace;">⚡ Electric Orbs (Level 2+)</h3>
+       <ul style="color: #cccccc; line-height: 1.8; list-style: none; padding: 0;">
+        <li>⚡ <strong>Red electric orbs</strong> appear from Level 2</li>
+        <li>💥 <strong>Touching them:</strong> Lose 1 point + Snake shrinks by 1 segment</li>
+        <li>🎯 <strong>30% spawn chance</strong> after eating food</li>
+        <li>⚠️ <strong>Avoid them!</strong> They have lightning effects around them</li>
+       </ul>
+      </div>
+      
+      <!-- กฎของเกม -->
+      <div style="background: rgba(255,100,100,0.1); padding: 20px; border-radius: 15px; border-left: 4px solid #ff6464;">
+       <h3 style="color: #ff6464; margin-bottom: 15px; font-family: 'Orbitron', monospace;">⚠️ Game Rules</h3>
+       <ul style="color: #cccccc; line-height: 1.8; list-style: none; padding: 0;">
+        <li>🚫 <strong>Don't hit yourself:</strong> Game over if snake touches its own body</li>
+        <li>🌀 <strong>Wall wrapping:</strong> Snake goes through walls safely</li>
+        <li>💎 <strong>Eat diamonds:</strong> +10 points, snake grows longer</li>
+        <li>⚡ <strong>Avoid electric orbs:</strong> -1 point, snake shrinks (Level 2+)</li>
+        <li>⏸️ <strong>Pause anytime:</strong> Use the pause button during gameplay</li>
+        <li>🎮 <strong>No movement = safe:</strong> Snake won't die if you don't move</li>
+       </ul>
+      </div>
+     </div>
+     <div style="text-align: center; margin-top: 30px;">
+       <button onclick="closeTutorial()" class="btn btn-primary" style="padding: 15px 30px; font-size: 1.1rem;"> 🚀 Start Playing! </button>
+     </div>
+    </div>
+   </div>
+  </div>
+
+  <!-- โหลดไฟล์ JavaScript -->
+  <script src="script.js"></script>
+ </body>
+</html>

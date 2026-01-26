@@ -1,0 +1,676 @@
+/* รีเซ็ตและตั้งค่าพื้นฐาน */
+body {
+  box-sizing: border-box;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+}
+
+/* สไตล์พื้นฐานของหน้าเว็บ */
+body {
+  font-family: 'Exo 2', sans-serif;
+  /* ขนาดฟอนต์พื้นฐานที่เล็กกว่าเพื่อให้ UI กะทัดรัด */
+  font-size: 13px;
+  /* กราเดียนต์ที่สว่างและเป็นมิตรมากขึ้น */
+  background: linear-gradient(135deg, #071b2f 0%, #0e2940 50%, #123449 100%);
+  color: #e6f7ff; /* ข้อความสีอ่อนนุ่ม */
+  overflow-x: hidden;
+  min-height: 100%;
+}
+
+/* คอนเทนเนอร์หลัก */
+.container {
+  max-width: 1200px;
+  /* เลื่อนแอปทั้งหมดไปทางซ้ายเล็กน้อยบนหน้าจอกว้าง */
+  margin: 20px 0 20px 0px; /* บน ขวา ล่าง ซ้าย */
+  padding: 20px;
+  min-height: 100%;
+}
+
+/* ส่วนหัวของหน้า */
+.header {
+  text-align: center;
+  margin-bottom: 40px;
+  padding: 30px;
+  /* ส่วนหัวที่โปร่งแสงและสว่างกว่าเดิมเล็กน้อย */
+  background: linear-gradient(45deg, rgba(0, 255, 255, 0.14), rgba(255, 0, 255, 0.12));
+  border-radius: 20px;
+  border: 2px solid rgba(0, 255, 255, 0.45);
+  box-shadow: 0 6px 30px rgba(0, 255, 255, 0.08);
+}
+
+/* ชื่อเกม */
+.title {
+  font-family: 'Orbitron', monospace;
+  font-size: 1.9rem;
+  font-weight: 900;
+  background: linear-gradient(45deg, #33fbff, #ff66ff, #fff07a);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 0 28px rgba(51, 251, 255, 0.15);
+  margin-bottom: 10px;
+}
+
+/* คำอธิบายย่อย */
+.subtitle {
+  font-size: 0.95rem;
+  color: #cccccc;
+  margin-bottom: 20px;
+}
+
+/* พื้นที่เกมหลัก - ใช้ Grid Layout */
+.game-area {
+  display: grid;
+  grid-template-columns: 1fr 350px;
+  gap: 30px;
+  margin-bottom: 30px;
+}
+
+/* Responsive Design - สำหรับหน้าจอขนาดเล็ก */
+@media (max-width: 768px) {
+  .game-area {
+    grid-template-columns: 1fr;
+  }
+  .title {
+    font-size: 2rem;
+  }
+}
+
+/* แผงเกมหลัก */
+.game-panel {
+  background: linear-gradient(135deg, rgba(2, 48, 72, 0.6), rgba(40, 6, 70, 0.45));
+  border-radius: 15px;
+  padding: 30px;
+  border: 2px solid rgba(51, 251, 255, 0.14);
+  box-shadow: 0 8px 40px rgba(2, 48, 72, 0.35);
+}
+
+/* คอนเทนเนอร์เกม */
+.game-container {
+  position: relative;
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* แคนวาสเกม (ขยายขนาด) */
+#gameCanvas {
+  width: 800px;
+  height: 480px;
+  border: 3px solid rgba(51, 251, 255, 0.9);
+  border-radius: 10px;
+  /* พื้นที่เล่นที่สว่างกว่าเล็กน้อย */
+  background: linear-gradient(180deg, #021a27 0%, #001826 100%);
+  box-shadow: 0 12px 40px rgba(0, 255, 255, 0.12);
+}
+
+/* Responsive สำหรับแท็บเล็ต */
+@media (max-width: 1024px) {
+  #gameCanvas {
+    width: 100%;
+    max-width: 580px;
+    height: auto;
+    aspect-ratio: 16 / 10;
+  }
+}
+
+/* ตรวจสอบให้แน่ใจว่าองค์ประกอบ UI ไม่ล้นบนหน้าจอขนาดเล็ก */
+@media (max-width: 1024px) {
+  .container {
+    padding: 12px;
+    margin: 0 auto; /* จัดกึ่งกลางอีกครั้งบนหน้าจอขนาดเล็ก */
+  }
+  .game-area {
+    grid-template-columns: 1fr; /* เรียงแผงในแนวตั้ง */
+    gap: 18px;
+  }
+  .game-panel, .stats-panel {
+    width: 100%;
+    max-width: 100%;
+  }
+  .stage-side {
+    flex: 0 0 auto;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
+  .stage-side video,
+  .stage-side canvas {
+    width: 90%;
+    height: auto;
+    max-width: 320px;
+  }
+  .controls {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 10px 6px;
+  }
+  .control-row {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+  }
+  .control-btn {
+    width: 48px;
+    height: 48px;
+    font-size: 1.2rem;
+  }
+  .stats-panel {
+    max-height: 52vh; /* ให้สถิติมองเห็นได้โดยไม่ดันเนื้อหาออกนอกหน้าจอ */
+    overflow-y: auto;
+    padding: 18px;
+  }
+  .overlay-content {
+    width: calc(100% - 36px);
+  }
+  .difficulty-select {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+}
+
+/* หน้าจอขนาดเล็ก (โทรศัพท์) - ระยะห่างที่แน่นขึ้นและตรวจสอบไม่ให้ล้น */
+@media (max-width: 480px) {
+  #gameCanvas { width: 100%; height: auto; }
+  .title { font-size: 1.6rem; }
+  .subtitle { font-size: 0.95rem; }
+  .btn { padding: 10px 16px; font-size: 0.85rem; }
+  .stats-panel { padding: 12px; }
+  .overlay-content { padding: 18px; }
+}
+
+/* ภาพทับซ้อนสำหรับการเริ่มเกมและจบเกม */
+.game-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+}
+
+/* ด้านขวาว่าง (ย้ายส่วนตรวจจับมือไปด้านซ้ายแล้ว) */
+.stage-side.right-empty {
+  display: none;
+}
+
+/* เลย์เอาต์เวทีใหม่: กล้องซ้าย, เกมกลาง, แคนวาสมือขวา */
+.main-stage {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.stage-side {
+  flex: 0 0 220px;
+  display: flex;
+  flex-direction: column; /* เรียงไอเท็มในแนวตั้ง (วิดีโอเหนือแคนวาสมือ) */
+  gap: 10px;
+  justify-content: center;
+  align-items: center;
+}
+
+.stage-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.stage-side video,
+.stage-side canvas {
+  width: 180px;
+  height: 135px;
+  object-fit: cover;
+  border-radius: 10px;
+}
+
+@media (max-width: 768px) {
+  .main-stage {
+    flex-direction: column;
+  }
+  .stage-side {
+    flex: 0 0 auto;
+    width: 80%;
+  }
+  .stage-side video,
+  .stage-side canvas {
+    width: 80%;
+    height: auto;
+  }
+}
+
+/* ส่วนควบคุม */
+.controls {
+  display: grid;
+  grid-template-rows: auto auto;
+  gap: 10px;
+  justify-items: center;
+  margin-top: 20px;
+}
+
+/* แถวปุ่มควบคุม */
+.control-row {
+  display: flex;
+  gap: 10px;
+}
+
+/* ปุ่มควบคุม */
+.control-btn {
+  width: 40px;
+  height: 40px;
+  border: 2px solid #00ffff;
+  background: rgba(0, 255, 255, 0.08);
+  color: #00ffff;
+  border-radius: 8px;
+  font-size: 1.05rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.control-btn:hover {
+  background: rgba(0, 255, 255, 0.2);
+  box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+}
+
+/* แผงสถิติ */
+.stats-panel {
+  background: linear-gradient(135deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  border-radius: 15px;
+  padding: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.06);
+  box-shadow: 0 10px 30px rgba(16, 44, 64, 0.45);
+}
+
+/* วางตัวควบคุมความยากให้เรียบร้อยภายในแผงสถิติ */
+.stats-panel .difficulty-select {
+  margin-top: 12px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.stats-panel .difficulty-select .btn {
+  padding: 6px 10px;
+  font-size: 0.8rem;
+}
+
+.difficulty-select label {
+  font-size: 0.88rem;
+}
+
+.difficulty-select #currentDifficulty {
+  font-size: 0.85rem;
+  margin-left: 8px;
+}
+
+/* ชื่อสถิติ */
+.stats-title {
+  font-family: 'Orbitron', monospace;
+  font-size: 1.5rem;
+  color: #ff00ff;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+/* การดำเนินการเกม */
+.game-actions {
+  margin-top: 25px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* รายการสถิติ */
+.stat-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 8px;
+  border-left: 4px solid rgba(51, 251, 255, 0.6);
+}
+
+.stat-label {
+  font-weight: 600;
+  color: #cccccc;
+}
+
+.stat-value {
+  font-family: 'Orbitron', monospace;
+  font-weight: 700;
+  color: #33fbff;
+  font-size: 1.1rem;
+}
+
+/* แถบความคืบหน้าเลเวล */
+.level-progress {
+  width: 100%;
+  height: 18px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 10px;
+  overflow: hidden;
+  margin: 15px 0;
+  border: 1px solid rgba(0, 255, 255, 0.3);
+}
+
+.level-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #00ffff, #ff00ff);
+  border-radius: 10px;
+  transition: width 0.5s ease;
+  box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+}
+
+/* ปุ่มดำเนินการ */
+.action-buttons {
+  display: flex;
+  gap: 15px;
+  margin-top: 25px;
+  flex-wrap: wrap;
+}
+
+/* สไตล์ปุ่มพื้นฐาน */
+.btn {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 25px;
+  font-family: 'Orbitron', monospace;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* ปุ่มหลัก */
+.btn-primary {
+  background: linear-gradient(45deg, #33fbff, #66b3ff);
+  color: #00121a;
+  box-shadow: 0 8px 30px rgba(51, 251, 255, 0.12);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 25px rgba(0, 255, 255, 0.5);
+}
+
+/* ปุ่มรอง */
+.btn-secondary {
+  background: linear-gradient(45deg, #ff66ff, #ff99cc);
+  color: #1b001b;
+  box-shadow: 0 8px 30px rgba(255, 102, 255, 0.08);
+}
+
+.btn-secondary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 25px rgba(255, 0, 255, 0.5);
+}
+
+/* กริดของสิ่งที่เก็บได้ */
+.collectibles-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.collectible {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.collectible.collected {
+  background: linear-gradient(45deg, #fff07a, #ffb36a);
+  border-color: #fff07a;
+  box-shadow: 0 8px 20px rgba(255, 176, 106, 0.18);
+  animation: pulse 2s infinite;
+}
+
+.collectible.uncollected {
+  background: rgba(100, 100, 100, 0.2);
+  border-color: rgba(100, 100, 100, 0.5);
+}
+
+/* อนิเมชันต่างๆ */
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@keyframes bounceIn {
+  0% { transform: scale(0.3) translateY(-50px); opacity: 0; }
+  50% { transform: scale(1.1) translateY(0); opacity: 1; }
+  100% { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+@keyframes glow {
+  0% { text-shadow: 0 0 30px #00ffff, 0 0 40px #00ffff; }
+  100% { text-shadow: 0 0 50px #00ffff, 0 0 60px #00ffff, 0 0 70px #00ffff; }
+}
+
+/* ตอนของเรื่องราว */
+.story-chapter {
+  background: linear-gradient(135deg, rgba(0, 100, 200, 0.1), rgba(100, 0, 200, 0.1));
+  border-radius: 12px;
+  padding: 20px;
+  margin: 20px 0;
+  border-left: 4px solid #00ffff;
+  box-shadow: 0 0 15px rgba(0, 255, 255, 0.1);
+}
+
+.chapter-title {
+  font-family: 'Orbitron', monospace;
+  color: #00ffff;
+  margin-bottom: 15px;
+  font-size: 1.3rem;
+}
+
+/* ตัวโหลด */
+.loading {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 3px solid rgba(0, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: #00ffff;
+  animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ความสำเร็จ */
+.achievement {
+  background: linear-gradient(45deg, rgba(255, 215, 0, 0.2), rgba(255, 140, 0, 0.2));
+  border: 2px solid #ffd700;
+  border-radius: 10px;
+  padding: 15px;
+  margin: 10px 0;
+  text-align: center;
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+}
+
+.achievement-title {
+  font-family: 'Orbitron', monospace;
+  color: #ffd700;
+  font-weight: 700;
+  margin-bottom: 5px;
+}
+
+/* ภาพทับซ้อนการตรวจจับท่าทาง */
+.pose-detection-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.face-bounding-box {
+  position: absolute;
+  border: 2px solid #00ff00;
+  background: rgba(0, 255, 0, 0.1);
+  border-radius: 10px;
+}
+
+.face-keypoint {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  background: #ff00ff;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* คำติชมท่าทาง */
+.pose-feedback {
+  text-align: center;
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border-left: 4px solid #ffff00;
+}
+
+.pose-feedback.good {
+  border-left-color: #00ff00;
+  background: rgba(0, 255, 0, 0.1);
+}
+
+.pose-feedback.excellent {
+  border-left-color: #00ffff;
+  background: rgba(0, 255, 255, 0.1);
+  animation: pulse 1s infinite;
+}
+
+@keyframes poseSuccess {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+.success-animation {
+  animation: poseSuccess 0.5s ease-in-out;
+}
+
+/* อนิเมชันการเต้นของกล้อง */
+@keyframes cameraPulse {
+  0% { box-shadow: 0 0 20px rgba(0, 255, 255, 0.5); }
+  50% { box-shadow: 0 0 30px rgba(0, 255, 255, 0.8); }
+  100% { box-shadow: 0 0 20px rgba(0, 255, 255, 0.5); }
+}
+
+.camera-active {
+  animation: cameraPulse 2s infinite;
+}
+
+.pose-success {
+  background: linear-gradient(45deg, #00ff00, #00cc00) !important;
+  transform: scale(1.05);
+  transition: all 0.3s ease;
+}
+
+.pose-fail {
+  background: linear-gradient(45deg, #ff0000, #cc0000) !important;
+  animation: shake 0.5s ease-in-out;
+}
+
+/* โครงหน้า */
+.face-skeleton {
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+}
+
+.skeleton-point {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: #ff00ff;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  border: 2px solid #ffffff;
+  box-shadow: 0 0 5px rgba(255, 0, 255, 0.8);
+}
+
+.skeleton-line {
+  position: absolute;
+  background: #00ffff;
+  transform-origin: 0 0;
+  box-shadow: 0 0 3px rgba(0, 255, 255, 0.8);
+}
+
+.pose-mismatch {
+  animation: shake 0.5s ease-in-out;
+  border: 3px solid #ff0000 !important;
+  box-shadow: 0 0 20px rgba(255, 0, 0, 0.5) !important;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-10px); }
+  75% { transform: translateX(10px); }
+}
+
+/* เคล็ดลับท่าทาง */
+.pose-tip {
+  background: linear-gradient(45deg, #ffff00, #ff8000);
+  color: #000;
+  padding: 10px 15px;
+  border-radius: 8px;
+  margin: 10px 0;
+  text-align: center;
+  font-weight: bold;
+  border: 2px solid #ffff00;
+  animation: pulse 2s infinite;
+}
+
+/* การเปลี่ยนมุมมอง */
+@view-transition { 
+  navigation: auto; 
+}
