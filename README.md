@@ -15,17 +15,38 @@ Core Technologies:
 3. Supplementary Framework/Library: TailwindCSS, Orbitron/Exo2 fonts, and Web Audio API for sound and effects.
 4. Platform: Compatible with PCs that have a webcam and Chrome, Firefox, or Edge browsers.
 5. Core File Structure: index.html, style.css, script.js, /weights/ and /picture/ folders.
+## 📊 Diagram Workflow
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/39d1d4a4-f5bf-4afb-8ac0-9f0d80141017" width="700">
+</p>
 
-diagram  workflow
-<img width="697" height="365" alt="image" src="https://github.com/user-attachments/assets/39d1d4a4-f5bf-4afb-8ac0-9f0d80141017" />
+---
 
-User Interface
-<img width="730" height="337" alt="image" src="https://github.com/user-attachments/assets/dcf62271-831e-45cc-8d85-80bc7df7408f" />
+## 🖥️ User Interface
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/dcf62271-831e-45cc-8d85-80bc7df7408f" width="700">
+</p>
 
-How To Play
-<img width="761" height="648" alt="image" src="https://github.com/user-attachments/assets/3a4817d9-50f8-49e0-b623-434c2ba58f6c" />
-<img width="776" height="605" alt="image" src="https://github.com/user-attachments/assets/d9339544-86d5-4bb9-9ae0-9cbc3f0f85ef" />
-<img width="720" height="587" alt="image" src="https://github.com/user-attachments/assets/7354b9d8-de8c-4feb-b87e-ebbb1e35bf20" />
+---
 
-Example Pose Challenge
-<img width="486" height="673" alt="image" src="https://github.com/user-attachments/assets/4b17d493-8325-4e08-839e-c435b7a69f45" />
+## 🎮 How To Play
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/3a4817d9-50f8-49e0-b623-434c2ba58f6c" width="600">
+</p>
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/d9339544-86d5-4bb9-9ae0-9cbc3f0f85ef" width="600">
+</p>
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/7354b9d8-de8c-4feb-b87e-ebbb1e35bf20" width="600">
+</p>
+
+---
+
+## 🤸 Example Pose Challenge
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/4b17d493-8325-4e08-839e-c435b7a69f45" width="400">
+</p>
+
